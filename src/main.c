@@ -4,18 +4,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-int main() {
+int conta_ocorrencias(char*, char*);
+
+int main(int argc, char **argv) {
     int i;
     int tamanho_texto;
     char *texto;
-    char caminho[250];
 
     FILE *f;
 
-    printf("Insira o caminho do texto: ");
-    scanf("%s", caminho);
-
-    f = fopen(caminho, "r");
+    f = fopen(argv[1], "r");
 
     if (!f) return 0;
 
@@ -36,4 +34,14 @@ int main() {
         else
             break;
     }
+}
+
+int conta_ocorrencias(char *texto, char *busca) {
+    int contagem = 0;
+    const char *string_auxiliar = texto;
+    while ((string_auxiliar = strstr(string_auxiliar, busca))) {
+        contagem++;
+        string_auxiliar++;
+    }
+    return contagem;
 }
