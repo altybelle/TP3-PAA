@@ -1,7 +1,7 @@
 #ifndef ANALISE_FREQUENCIA
 #define ANALISE_FREQUENCIA
 
-#define TAMANHO_ALFABETO 52
+#define TAMANHO_ALFABETO 26
 
 typedef struct analise_frequencia {
     char letra;

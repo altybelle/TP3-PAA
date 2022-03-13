@@ -72,6 +72,5 @@ void ordena_frequencia(analise_frequencia* analise) {
 }
 
 int eh_letra(char caractere) {
-    return 1 * (caractere >= 65 && caractere <= 90) + 
-           1 * (caractere >= 97 && caractere <= 122);
+    return 1 * (caractere >= 65 && caractere <= 90);
 }
