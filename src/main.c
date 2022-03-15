@@ -4,23 +4,27 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define ASCII_LENGTH 256
 #define ASCII_A 65
 #define ASCII_Z 90
 
 int escolhe_opcoes();
 void estado_atual_criptoanalise(char*, char*, char*);
 void faz_analise_de_frequencia(analise_frequencia*, char*, int);
-int conta_ocorrencias(char*, char*);
+int casamento_exato(char*);
+void preprocessa_substring(char*, int, int*);
 
 int main(int argc, char **argv) {
     int i;
     int opcao;
     int tamanho_texto;
+    int ocorrencias;
 
     char *texto = NULL;
     char *chave = NULL;
     char *texto_descriptografado = NULL;
     analise_frequencia *analise = NULL;
+    
 
     FILE *f;
 
@@ -62,6 +66,7 @@ int main(int argc, char **argv) {
                 faz_analise_de_frequencia(analise, texto, tamanho_texto);
                 break;
             case 3:
+                ocorrencias = casamento_exato(texto);
                 break;
             case 4:
                 break;
@@ -137,12 +142,68 @@ void faz_analise_de_frequencia(analise_frequencia *analise, char* texto, int tam
     }
 }
 
-int conta_ocorrencias(char *texto, char *busca) {
-    int contagem = 0;
-    const char *string_auxiliar = texto;
-    while ((string_auxiliar = strstr(string_auxiliar, busca))) {
-        contagem++;
-        string_auxiliar++;
+int casamento_exato(char *texto) {
+    int i, j, res, next_i;
+    int M, N;
+    int *lps;
+    char pattern[256];
+    puts("> Qual o padrao utilizado?");
+    scanf("%s", pattern);
+
+    M = strlen(pattern);
+    N = strlen(texto);
+
+    lps = (int*) malloc(sizeof(int) * M);
+    j = 0;
+
+    preprocessa_substring(pattern, M, lps);
+    i = res = next_i = 0;
+
+    while (i < N) {
+        if (pattern[j] == texto[i]) {
+            j++;
+            i++;
+        }
+        if (j == M) {
+            j = lps[j - 1];
+            res++;
+
+            if (lps[j] != 0) {
+                next_i++;
+                i = next_i;
+                j = 0;
+            }
+        } else if ((i < N) && (pattern[j] != texto[i])) {
+            if (j != 0)
+                j = lps[j - 1];
+            else
+                i++;
+        }
     }
-    return contagem;
+
+    printf("Ocorrencias: %d\n", res);
+    return res;
+}
+
+void preprocessa_substring(char* pattern, int M, int* lps) {
+    int i, size;
+    
+    size = 0;
+    i = 1;
+    lps[0] = 0;
+    while (i < M) {
+        if (pattern[i] == pattern[size]) {
+            size++;
+            lps[i] = size;
+            i++;
+        } else {
+            if (size != 0) {
+                size = lps[size - 1];
+            }
+            else {
+                lps[i] = size;
+                i++;
+            }
+        }
+    }
 }
