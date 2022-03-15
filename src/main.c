@@ -12,7 +12,9 @@ int escolhe_opcoes();
 void estado_atual_criptoanalise(char*, char*, char*);
 void faz_analise_de_frequencia(analise_frequencia*, char*, int);
 int casamento_exato(char*);
+void alterar_chave(char*, char*);
 void preprocessa_substring(char*, int, int*);
+void exportar(char*, char*);
 
 int main(int argc, char **argv) {
     int i;
@@ -71,13 +73,21 @@ int main(int argc, char **argv) {
             case 4:
                 break;
             case 5:
+                alterar_chave(texto_descriptografado, chave);
                 break;
             case 6:
+                exportar(chave, texto_descriptografado);
                 break;
             default:
                 printf("Opcao invalida. Tente novamente...");
         }
     } while (opcao != 6);
+
+    puts("=================================================================================");
+    printf("Arquivos exportados com sucesso. Saindo do programa...\n");
+    puts("=================================================================================");
+
+    return 0;
 }
 
 int escolhe_opcoes() {
@@ -91,7 +101,9 @@ int escolhe_opcoes() {
     puts("5. Alterar chave de criptografia;");
     puts("6. Exportar resultado e encerrar o programa.");
     puts("=================================================================================");
-    printf("Informe a opcao escolhida: "); scanf("%d", &opcao);
+    printf("Informe a opcao escolhida: "); 
+    scanf("%d", &opcao);
+    getc(stdin);
     return opcao;
 }
 
@@ -183,6 +195,59 @@ int casamento_exato(char *texto) {
 
     printf("Ocorrencias: %d\n", res);
     return res;
+}
+
+void alterar_chave(char *texto_descriptografado, char* chave) {
+    int i;
+    int tamanho_texto;
+    char original, criptografada;
+    puts("Informe a letra original, seguida da letra para a qual foi mapeada:");
+    printf("> "); 
+    scanf("%c", &original);
+    getc(stdin);
+    scanf("%c", &criptografada);
+
+    tamanho_texto = strlen(texto_descriptografado);
+
+    for (i = 0; i < tamanho_texto; i++) {
+        if (texto_descriptografado[i] == original)
+            texto_descriptografado[i] = criptografada;
+    }
+
+    chave[((int)original) - ASCII_A] = criptografada;
+
+    printf("Registrado: %c -> %c\n", original, criptografada);
+}
+
+void exportar(char *chave, char *texto_descriptografado) {
+    FILE *f = NULL;
+    char caminho_arquivo[250];
+
+    printf("Digite o nome e formato do arquivo em que sera salva a chave: ");
+    scanf("%s", caminho_arquivo);
+    puts(caminho_arquivo);
+    f = fopen(caminho_arquivo, "w");
+
+    if (!f) {
+        printf("Erro: impossivel salvar o arquivo.\n");
+        return;
+    }
+
+    fprintf(f, "%s\n", chave);
+    fclose(f);
+
+    printf("Digite o nome e formato do arquivo em que sera salvo o texto descriptografado: ");
+    scanf("%s", caminho_arquivo);
+
+    f = fopen(caminho_arquivo, "w");
+    
+    if (!f) {
+        printf("Erro: impossivel salvar o arquivo.\n");
+        return;
+    }
+    
+    fprintf(f, "%s\n", texto_descriptografado);
+    fclose(f);
 }
 
 void preprocessa_substring(char* pattern, int M, int* lps) {
