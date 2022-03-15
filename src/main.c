@@ -12,7 +12,7 @@ int escolhe_opcoes();
 void estado_atual_criptoanalise(char*, char*, char*);
 void faz_analise_de_frequencia(analise_frequencia*, char*, int);
 int casamento_exato(char*);
-void alterar_chave(char*, char*);
+void alterar_chave(char*, char*, int*);
 void preprocessa_substring(char*, int, int*);
 void exportar(char*, char*);
 
@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
     char *texto = NULL;
     char *chave = NULL;
     char *texto_descriptografado = NULL;
+    int *estado_descriptografia = NULL;
     analise_frequencia *analise = NULL;
     
 
@@ -51,11 +52,17 @@ int main(int argc, char **argv) {
     tamanho_texto = strlen(texto);
 
     texto_descriptografado = (char*) malloc(sizeof(char) * tamanho_texto);
+    estado_descriptografia = (int*) malloc(sizeof(int) * tamanho_texto);
+
+    for (i = 0; i < tamanho_texto; i++) {
+        estado_descriptografia[i] = 0;
+    }
+
     strcpy(texto_descriptografado, texto);
     chave = (char*) malloc(sizeof(char) * TAMANHO_ALFABETO);
 
     for (i = 0; i < TAMANHO_ALFABETO; i++) {
-        chave[i] = '@';
+        chave[i] = ' ';
     }
 
     do {
@@ -73,7 +80,7 @@ int main(int argc, char **argv) {
             case 4:
                 break;
             case 5:
-                alterar_chave(texto_descriptografado, chave);
+                alterar_chave(texto_descriptografado, chave, estado_descriptografia);
                 break;
             case 6:
                 exportar(chave, texto_descriptografado);
@@ -123,11 +130,7 @@ void estado_atual_criptoanalise(char *texto, char *chave, char *texto_decifrado)
     }
     puts("");
     for (i = 0; i < TAMANHO_ALFABETO; i++) {
-        if (chave[i] != '@') {
-            printf("%c", chave[i]);
-        } else {
-            printf(" ");
-        }
+        printf("%c", chave[i]);
     }
     puts("\n\n=== Texto parcialmente decifrado ===");
     puts(texto_decifrado);
@@ -147,7 +150,7 @@ void faz_analise_de_frequencia(analise_frequencia *analise, char* texto, int tam
     analise = executa_analise(texto, tamanho_texto);
 
     for (i = 0; i < TAMANHO_ALFABETO; i++) {
-        if (analise[i].letra != '@')
+        if (analise[i].letra != ' ')
             imprime_analise(analise[i]);
         else
             break;
@@ -197,9 +200,9 @@ int casamento_exato(char *texto) {
     return res;
 }
 
-void alterar_chave(char *texto_descriptografado, char* chave) {
-    int i;
-    int tamanho_texto;
+void alterar_chave(char *texto_descriptografado, char* chave, int *estado_descriptografia) {
+    int i, j;
+    int tamanho_texto, tamanho_chave;
     char original, criptografada;
     puts("Informe a letra original, seguida da letra para a qual foi mapeada:");
     printf("> "); 
@@ -207,14 +210,19 @@ void alterar_chave(char *texto_descriptografado, char* chave) {
     getc(stdin);
     scanf("%c", &criptografada);
 
+    chave[((int)original) - ASCII_A] = criptografada;
+
     tamanho_texto = strlen(texto_descriptografado);
+    tamanho_chave = (ASCII_Z - ASCII_A) + 1;
 
     for (i = 0; i < tamanho_texto; i++) {
-        if (texto_descriptografado[i] == original)
-            texto_descriptografado[i] = criptografada;
+        for (j = 0; j < tamanho_chave; j++) {
+            if (((int)texto_descriptografado[i]) == j + ASCII_A && estado_descriptografia[i] != 1 && chave[j] != ' ') {
+                texto_descriptografado[i] = chave[j];
+                estado_descriptografia[i] = 1;
+            }
+        }
     }
-
-    chave[((int)original) - ASCII_A] = criptografada;
 
     printf("Registrado: %c -> %c\n", original, criptografada);
 }
@@ -225,7 +233,6 @@ void exportar(char *chave, char *texto_descriptografado) {
 
     printf("Digite o nome e formato do arquivo em que sera salva a chave: ");
     scanf("%s", caminho_arquivo);
-    puts(caminho_arquivo);
     f = fopen(caminho_arquivo, "w");
 
     if (!f) {
@@ -233,7 +240,7 @@ void exportar(char *chave, char *texto_descriptografado) {
         return;
     }
 
-    fprintf(f, "%s\n", chave);
+    fprintf(f, "%s", chave);
     fclose(f);
 
     printf("Digite o nome e formato do arquivo em que sera salvo o texto descriptografado: ");
@@ -246,7 +253,7 @@ void exportar(char *chave, char *texto_descriptografado) {
         return;
     }
     
-    fprintf(f, "%s\n", texto_descriptografado);
+    fprintf(f, "%s", texto_descriptografado);
     fclose(f);
 }
 

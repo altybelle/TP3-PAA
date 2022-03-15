@@ -8,7 +8,7 @@ analise_frequencia *executa_analise(char *texto, int tamanho_texto) {
     int total_letras;
 
     analise_frequencia *analise;
-    analise_frequencia temp = {'@', 0, 0};
+    analise_frequencia temp = {' ', 0, 0};
 
     analise = (analise_frequencia*) malloc(sizeof(analise_frequencia) * TAMANHO_ALFABETO);
     
@@ -33,7 +33,7 @@ analise_frequencia *executa_analise(char *texto, int tamanho_texto) {
     }
 
     for (i = 0; i < TAMANHO_ALFABETO; i++) {
-        if (analise[i].letra != '@') {
+        if (analise[i].letra != ' ') {
             analise[i].frequencia = (((float)analise[i].contagem) / ((float)total_letras)) * 100.0;
         } else {
             break;
