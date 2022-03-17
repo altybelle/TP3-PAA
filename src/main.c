@@ -12,6 +12,7 @@ int escolhe_opcoes();
 void estado_atual_criptoanalise(char*, char*, char*);
 void faz_analise_de_frequencia(analise_frequencia*, char*, int);
 int casamento_exato(char*);
+void casamento_aproximado(char*);
 void alterar_chave(char*, char*, int*);
 void preprocessa_substring(char*, int, int*);
 void exportar(char*, char*);
@@ -78,6 +79,7 @@ int main(int argc, char **argv) {
                 ocorrencias = casamento_exato(texto);
                 break;
             case 4:
+                casamento_aproximado(texto_descriptografado);
                 break;
             case 5:
                 alterar_chave(texto_descriptografado, chave, estado_descriptografia);
@@ -198,6 +200,57 @@ int casamento_exato(char *texto) {
 
     printf("Ocorrencias: %d\n", res);
     return res;
+}
+
+void casamento_aproximado(char *texto_descriptografado) {
+    int res;
+    int tamanho_texto, tamanho_padrao;
+
+    char pattern[256];
+    int erros;
+
+    puts("> Qual o padrao e a tolerancia utilizados?");
+    scanf("%s", pattern);
+    scanf("%d", &erros);
+
+    res = 0;
+    tamanho_texto = strlen(texto_descriptografado);
+    tamanho_padrao = strlen(pattern);
+
+    if (erros > tamanho_padrao + 1) {
+        erros = tamanho_padrao + 1;
+    }
+
+    int M[ASCII_LENGTH], i, j, r_i, r_ant, r_novo;
+    int *R;
+    R = (int*) malloc(sizeof(int) * (tamanho_padrao + 1));
+
+    for (i = 0; i < ASCII_LENGTH; i++) 
+        M[i] = 0;
+    for (i = 1; i <= tamanho_padrao; i++) 
+        M[pattern[i - 1] + 127] |= 1 << (tamanho_padrao - i);
+    
+    R[0] = 0;
+    r_i = 1 << (tamanho_padrao - 1);
+
+    for (i = 1; i <= erros; i++)
+        R[i] = (1 << (tamanho_padrao - i)) | R[i - 1];
+    for (i = 0; i < tamanho_texto; i++) {
+        r_ant = R[0];
+        r_novo = (((r_ant) >> 1) | r_i) & M[texto_descriptografado[i] + 127];
+        R[0] = r_novo;
+        for (j = 1; j <= erros; j++) {
+            r_novo = ((R[j] >> 1) & M[texto_descriptografado[i] + 127]) | r_ant | (((r_ant | r_novo)) >> 1);
+            r_ant = R[j];
+            R[j] = r_novo | r_i;
+        }
+        if ((r_novo & 1) != 0)
+            if (i + 1 > tamanho_padrao - 1) {
+                res++;
+            }
+    }
+
+    printf("Ocorrencias: %d\n", res);
 }
 
 void alterar_chave(char *texto_descriptografado, char* chave, int *estado_descriptografia) {
