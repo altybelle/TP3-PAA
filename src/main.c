@@ -246,6 +246,10 @@ void casamento_aproximado(char *texto_descriptografado) {
         if ((r_novo & 1) != 0)
             if (i + 1 > tamanho_padrao - 1) {
                 res++;
+                printf("@[%d, %d): ", (i + 1) - tamanho_padrao,  i + 1);
+                for (j = (i + 1) - tamanho_padrao; j <= i + 1; j++)
+                    printf("%c", texto_descriptografado[j]);
+                puts("");
             }
     }
 
